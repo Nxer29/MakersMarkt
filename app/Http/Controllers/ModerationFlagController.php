@@ -11,19 +11,22 @@ class ModerationFlagController extends Controller
     public function store(Request $request, int $productId)
     {
         $data = $request->validate([
-            'flagged_by_user_id' => ['nullable','integer','exists:users,id'],
             'reason' => ['required','string','max:255'],
             'automatic' => ['sometimes','boolean'],
         ]);
 
         $flag = ModerationFlag::create([
             'product_id' => $productId,
-            'flagged_by_user_id' => $data['flagged_by_user_id'] ?? null,
+            'flagged_by_user_id' => auth()->id(),
             'reason' => $data['reason'],
             'automatic' => $data['automatic'] ?? false,
             'created_at' => now(),
         ]);
 
-        return response()->json($flag, 201);
+        if ($request->wantsJson()) {
+            return response()->json($flag, 201);
+        }
+
+        return back()->with('success', 'Product gemarkeerd voor moderatie.');
     }
 }

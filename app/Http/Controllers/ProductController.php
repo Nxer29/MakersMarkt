@@ -25,15 +25,27 @@ class ProductController extends Controller
             });
         }
 
-        return $q->orderByDesc('created_at')->paginate(20);
+        $products = $q->orderByDesc('created_at')->paginate(20);
+
+        if ($request->wantsJson()) {
+            return $products;
+        }
+
+        return view('products.index', compact('products'));
+    }
+    public function create()
+    {
+        return view('products.create');
     }
 
+    public function edit(Product $product)
+    {
+        return view('products.edit', compact('product'));
+    }
     // POST /products (maker)
     public function store(Request $request)
     {
-        // Voor prototype: simpele validatie
         $data = $request->validate([
-            'maker_id' => ['required','integer','exists:users,id'],
             'name' => ['required','string','max:255'],
             'description' => ['required','string'],
             'type' => ['required','string','max:255'],
@@ -44,9 +56,14 @@ class ProductController extends Controller
             'unique_features' => ['required','string'],
         ]);
 
+        $data['maker_id'] = auth()->id();
         $product = Product::create($data);
 
-        return response()->json($product, 201);
+        if ($request->wantsJson()) {
+            return response()->json($product, 201);
+        }
+
+        return redirect()->route('products.index')->with('success', 'Product toegevoegd!');
     }
 
     // GET /products/{id}

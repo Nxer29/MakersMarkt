@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // Public page
@@ -13,12 +16,21 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// App pages (Blade views) for navigation
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('/catalog', 'catalog')->name('catalog');
-    Route::view('/my-products', 'my-products')->name('my-products');
-    Route::view('/my-orders', 'my-orders')->name('my-orders');
-    Route::view('/notifications', 'notifications')->name('notifications');
+
+    // Catalog / Products (CRUD)
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::patch('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+    // Orders page (for buyer)
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+
+    // Notifications page
+    Route::get('/notifications', [NotificationController::class, 'page'])->name('notifications.page');
 
     // Profile (Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

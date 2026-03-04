@@ -8,10 +8,26 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    public function index(Request $request)
+    {
+        $orders = Order::with('product')
+            ->where('buyer_id', auth()->id())
+            ->orderByDesc('created_at')
+            ->paginate(10);
+
+        if ($request->wantsJson()) {
+            return $orders;
+        }
+
+        return view('orders.index', compact('orders'));
+    }
+
     // POST /orders  (buyer koopt product)
     // body: buyer_id, product_id, amount (prijs)
     public function store(Request $request)
     {
+        $isJson = $request->wantsJson();
+
         $data = $request->validate([
             'buyer_id' => ['required','integer','exists:users,id'],
             'product_id' => ['required','integer','exists:products,id'],
@@ -22,7 +38,7 @@ class OrderController extends Controller
         $product = Product::whereNull('deleted_at')->findOrFail($data['product_id']);
         $makerId = $product->maker_id;
 
-        return DB::transaction(function () use ($buyer, $product, $makerId, $data) {
+        return DB::transaction(function () use ($isJson, $buyer, $product, $makerId, $data) {
             // saldo check
             if ((float)$buyer->wallet_credit < (float)$data['amount']) {
                 return response()->json(['message' => 'Onvoldoende wallet credit.'], 422);
@@ -63,7 +79,11 @@ class OrderController extends Controller
                 'created_at' => now(),
             ]);
 
-            return response()->json($order->load('product'), 201);
+            if ($isJson) {
+                return response()->json($order->load('product'), 201);
+            }
+
+            return redirect()->route('orders.index')->with('success', 'Bestelling geplaatst!');
         });
     }
 
@@ -103,8 +123,6 @@ class OrderController extends Controller
 
     private function refund(Request $request, Order $order, ?string $note)
     {
-        // Voor refund moet je weten hoeveel er betaald is.
-        // We pakken de laatste purchase transactie voor deze order.
         $purchase = CreditTransaction::where('order_id', $order->id)
             ->where('reason', 'purchase')
             ->orderByDesc('id')
@@ -118,7 +136,6 @@ class OrderController extends Controller
             $maker = User::lockForUpdate()->findOrFail($purchase->to_user_id);
             $buyer = User::lockForUpdate()->findOrFail($purchase->from_user_id);
 
-            // maker -> buyer
             $maker->wallet_credit = (float)$maker->wallet_credit - (float)$purchase->amount;
             $buyer->wallet_credit = (float)$buyer->wallet_credit + (float)$purchase->amount;
             $maker->save();

@@ -38,6 +38,30 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    public function products()
+    {
+        return $this->hasMany(\App\Models\Product::class, 'maker_id');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(\App\Models\Order::class, 'buyer_id');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(\App\Models\Notification::class);
+    }
+
+    public function sentCreditTransactions()
+    {
+        return $this->hasMany(\App\Models\CreditTransaction::class, 'from_user_id');
+    }
+
+    public function receivedCreditTransactions()
+    {
+        return $this->hasMany(\App\Models\CreditTransaction::class, 'to_user_id');
+    }
     protected function casts(): array
     {
         return [

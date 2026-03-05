@@ -15,10 +15,21 @@ class NotificationController extends Controller
             ->paginate(30);
     }
 
+    public function page()
+    {
+        $notifications = Notification::where('user_id', auth()->id())
+            ->orderByDesc('created_at')
+            ->paginate(15);
+
+        return view('notifications.index', compact('notifications'));
+    }
     // PATCH /notifications/{notification}/read
-    public function markRead(Notification $notification)
+    public function markRead(Request $request, Notification $notification)
     {
         $notification->update(['is_read' => true]);
-        return $notification;
+
+        if ($request->wantsJson()) return $notification;
+
+        return back();
     }
 }

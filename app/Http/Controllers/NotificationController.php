@@ -7,14 +7,21 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    // GET /users/{user}/notifications
-    public function index(int $userId)
+    // API: GET /api/notifications
+    public function index(Request $request)
     {
-        return Notification::where('user_id', $userId)
+        $notifications = Notification::where('user_id', auth()->id())
             ->orderByDesc('created_at')
             ->paginate(30);
+
+        if ($request->wantsJson()) {
+            return $notifications;
+        }
+
+        return view('notifications.index', compact('notifications'));
     }
 
+    // Web page
     public function page()
     {
         $notifications = Notification::where('user_id', auth()->id())
@@ -23,12 +30,20 @@ class NotificationController extends Controller
 
         return view('notifications.index', compact('notifications'));
     }
+
     // PATCH /notifications/{notification}/read
     public function markRead(Request $request, Notification $notification)
     {
+        // Security check: user mag alleen eigen notificatie aanpassen
+        if ($notification->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $notification->update(['is_read' => true]);
 
-        if ($request->wantsJson()) return $notification;
+        if ($request->wantsJson()) {
+            return $notification;
+        }
 
         return back();
     }

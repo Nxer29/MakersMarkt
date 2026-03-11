@@ -31,6 +31,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Orders page (for buyer)
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
+    Route::get('/maker/orders', [OrderController::class, 'makerIndex'])->name('maker.orders.index');
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status.update');
+
     // Notifications page
     Route::get('/notifications', [NotificationController::class, 'page'])->name('notifications.page');
 

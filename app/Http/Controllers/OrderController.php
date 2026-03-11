@@ -95,6 +95,12 @@ class OrderController extends Controller
             'status_note' => ['nullable','string','max:255'],
         ]);
 
+
+        $order->loadMissing('product');
+        if (($order->product?->maker_id ?? null) !== auth()->id()) {
+            abort(403);
+        }
+
         $allowed = ['nieuw','in_productie','verzonden','geweigerd_terugbetaald'];
         if (!in_array($data['status'], $allowed, true)) {
             return response()->json(['message' => 'Ongeldige status.'], 422);

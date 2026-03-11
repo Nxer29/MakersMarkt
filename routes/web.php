@@ -18,18 +18,22 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Catalog / Products (CRUD)
+    // Catalog: iedereen ingelogd
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-    Route::patch('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
-    Route::get('/portfolio', [ProductController::class, 'portfolio'])->name('products.portfolio');
 
-    // Orders page (for buyer)
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    // Maker-only: product beheren
+    Route::middleware('role:maker|admin')->group(function () {
+        Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+        Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+        Route::patch('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    });
+
+    // Koper-only: orders bekijken
+    Route::middleware('role:koper|admin')->group(function () {
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    });
 
     Route::get('/maker/orders', [OrderController::class, 'makerIndex'])->name('maker.orders.index');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status.update');

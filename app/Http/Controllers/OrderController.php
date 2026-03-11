@@ -29,22 +29,23 @@ class OrderController extends Controller
         $isJson = $request->wantsJson();
 
         $data = $request->validate([
-            'buyer_id' => ['required','integer','exists:users,id'],
             'product_id' => ['required','integer','exists:products,id'],
             'amount' => ['required','numeric','min:0.01'],
         ]);
 
-        $buyer = User::findOrFail($data['buyer_id']);
-        $product = Product::whereNull('deleted_at')->findOrFail($data['product_id']);
+        $buyer = auth()->user();
+
+        $product = Product::whereNull('deleted_at')
+            ->findOrFail($data['product_id']);
+
         $makerId = $product->maker_id;
 
         return DB::transaction(function () use ($isJson, $buyer, $product, $makerId, $data) {
-            // saldo check
+
             if ((float)$buyer->wallet_credit < (float)$data['amount']) {
                 return response()->json(['message' => 'Onvoldoende wallet credit.'], 422);
             }
 
-            // order maken
             $order = Order::create([
                 'buyer_id' => $buyer->id,
                 'product_id' => $product->id,
@@ -52,12 +53,11 @@ class OrderController extends Controller
                 'status_note' => null,
             ]);
 
-            // wallet: koper -> maker
             $maker = User::lockForUpdate()->findOrFail($makerId);
             $buyerLocked = User::lockForUpdate()->findOrFail($buyer->id);
 
-            $buyerLocked->wallet_credit = (float)$buyerLocked->wallet_credit - (float)$data['amount'];
-            $maker->wallet_credit = (float)$maker->wallet_credit + (float)$data['amount'];
+            $buyerLocked->wallet_credit -= $data['amount'];
+            $maker->wallet_credit += $data['amount'];
 
             $buyerLocked->save();
             $maker->save();
@@ -71,7 +71,6 @@ class OrderController extends Controller
                 'created_at' => now(),
             ]);
 
-            // notificatie voor maker
             Notification::create([
                 'user_id' => $maker->id,
                 'message' => "Nieuwe bestelling (#{$order->id}) voor product '{$product->name}'.",
@@ -83,7 +82,8 @@ class OrderController extends Controller
                 return response()->json($order->load('product'), 201);
             }
 
-            return redirect()->route('orders.index')->with('success', 'Bestelling geplaatst!');
+            return redirect()->route('orders.index')
+                ->with('success', 'Bestelling geplaatst!');
         });
     }
 

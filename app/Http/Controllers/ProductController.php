@@ -63,9 +63,6 @@ class ProductController extends Controller
 
         $data['maker_id'] = auth()->id();
 
-
-        $data['verified'] = false;
-
         $product = Product::create($data);
 
         if ($request->wantsJson()) {
@@ -73,7 +70,7 @@ class ProductController extends Controller
         }
 
         return redirect()
-            ->route('products.portfolio')
+            ->route('products.show', $product)
             ->with('success', 'Product toegevoegd!');
     }
 

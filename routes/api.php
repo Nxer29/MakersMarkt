@@ -9,21 +9,29 @@ use App\Http\Controllers\{
     ModerationFlagController
 };
 
-// If you want these to require login via Sanctum, use ->middleware('auth:sanctum')
-// For now (prototype) I'll leave them open or you can enable auth:sanctum later.
+Route::middleware(['auth:sanctum'])->group(function () {
 
-Route::get('/products', [ProductController::class, 'index']);
-Route::post('/products', [ProductController::class, 'store']);
-Route::get('/products/{product}', [ProductController::class, 'show']);
-Route::patch('/products/{product}', [ProductController::class, 'update']);
-Route::delete('/products/{product}', [ProductController::class, 'destroy']);
+    // Iedereen ingelogd: catalog
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/{product}', [ProductController::class, 'show']);
 
-Route::post('/orders', [OrderController::class, 'store']);
-Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+    // Maker-only: products beheren + order status
+    Route::middleware('role:maker|admin')->group(function () {
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::patch('/products/{product}', [ProductController::class, 'update']);
+        Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
-Route::post('/orders/{order}/review', [ReviewController::class, 'store']);
+        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+    });
 
-Route::get('/users/{userId}/notifications', [NotificationController::class, 'index']);
-Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+    // Koper-only: orders plaatsen + review
+    Route::middleware('role:koper|admin')->group(function () {
+        Route::post('/orders', [OrderController::class, 'store']);
+        Route::post('/orders/{order}/review', [ReviewController::class, 'store']);
+    });
 
-Route::post('/products/{productId}/flags', [ModerationFlagController::class, 'store']);
+    // Iedereen ingelogd: notifications + flags
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+    Route::post('/products/{productId}/flags', [ModerationFlagController::class, 'store']);
+});

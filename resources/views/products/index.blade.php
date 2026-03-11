@@ -28,17 +28,22 @@
                     <tbody>
                     @foreach($products as $product)
                         <tr class="border-b">
-                            <td class="py-2">{{ $product->name }}</td>
+                            <td class="py-2">
+                                <a class="text-indigo-600 hover:underline" href="{{ route('products.show', $product) }}">
+                                    {{ $product->name }}
+                                </a>
+                            </td>
                             <td class="py-2">{{ $product->type }}</td>
-                            <td class="py-2">{{ $product->maker_id }}</td>
+                            <td class="py-2">{{ $product->maker?->name ?? $product->maker_id }}</td>
                             <td class="py-2 flex gap-3">
-                                <a class="text-indigo-600" href="{{ route('products.edit', $product) }}">Edit</a>
+                                <a class="text-indigo-600 hover:underline" href="{{ route('products.show', $product) }}">View</a>
+                                <a class="text-indigo-600 hover:underline" href="{{ route('products.edit', $product) }}">Edit</a>
 
                                 <form method="POST" action="{{ route('products.destroy', $product) }}"
                                       onsubmit="return confirm('Delete this product?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="text-red-600">Delete</button>
+                                    <button class="text-red-600 hover:underline">Delete</button>
                                 </form>
                             </td>
                         </tr>

@@ -10,7 +10,9 @@ class ProductController extends Controller
     // GET /products?type=...&q=...
     public function index(Request $request)
     {
-        $q = Product::query()->whereNull('deleted_at')->where('flagged', false);
+        $q = Product::query()
+            ->whereNull('deleted_at')
+            ->where('flagged', false);
 
         if ($request->filled('type')) {
             $q->where('type', $request->string('type'));
@@ -25,7 +27,8 @@ class ProductController extends Controller
             });
         }
 
-        $products = $q->orderByDesc('created_at')->paginate(20);
+        // ✅ CHANGE: maker eager-load
+        $products = $q->with('maker')->orderByDesc('created_at')->paginate(20);
 
         if ($request->wantsJson()) {
             return $products;
@@ -33,6 +36,7 @@ class ProductController extends Controller
 
         return view('products.index', compact('products'));
     }
+
     public function create()
     {
         return view('products.create');
@@ -42,6 +46,7 @@ class ProductController extends Controller
     {
         return view('products.edit', compact('product'));
     }
+
     // POST /products (maker)
     public function store(Request $request)
     {
@@ -60,16 +65,24 @@ class ProductController extends Controller
         $product = Product::create($data);
 
         if ($request->wantsJson()) {
-            return response()->json($product, 201);
+            return response()->json($product->load('maker'), 201);
         }
 
-        return redirect()->route('products.index')->with('success', 'Product toegevoegd!');
+        return redirect()
+            ->route('products.show', $product)
+            ->with('success', 'Product toegevoegd!');
     }
 
     // GET /products/{id}
-    public function show(Product $product)
+    public function show(Request $request, Product $product)
     {
-        return $product->load('maker');
+        $product->load('maker');
+
+        if ($request->wantsJson()) {
+            return $product;
+        }
+
+        return view('products.show', compact('product'));
     }
 
     // PATCH /products/{id}
@@ -88,13 +101,26 @@ class ProductController extends Controller
 
         $product->update($data);
 
-        return $product;
+        if ($request->wantsJson()) {
+            return $product->load('maker');
+        }
+
+        return redirect()
+            ->route('products.show', $product)
+            ->with('success', 'Product bijgewerkt!');
     }
 
     // DELETE /products/{id} -> soft delete via deleted_at
-    public function destroy(Product $product)
+    public function destroy(Request $request, Product $product)
     {
         $product->update(['deleted_at' => now()]);
-        return response()->noContent();
+
+        if ($request->wantsJson()) {
+            return response()->noContent();
+        }
+
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Product verwijderd!');
     }
 }

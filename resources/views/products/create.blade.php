@@ -1,7 +1,10 @@
 <x-app-layout>
     <div class="py-8 max-w-3xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-            <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Create product</h1>
+            <div class="flex items-center justify-between gap-3">
+                <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Create product</h1>
+                <a href="{{ route('products.index') }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded">Back</a>
+            </div>
 
             <form method="POST" action="{{ route('products.store') }}" class="mt-6 space-y-4">
                 @csrf

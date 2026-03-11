@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/portfolio', [ProductController::class, 'portfolio'])->name('products.portfolio');
 
     // Orders page (for buyer)
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');

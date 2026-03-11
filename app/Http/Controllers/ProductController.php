@@ -62,6 +62,10 @@ class ProductController extends Controller
         ]);
 
         $data['maker_id'] = auth()->id();
+
+
+        $data['verified'] = false;
+
         $product = Product::create($data);
 
         if ($request->wantsJson()) {
@@ -69,7 +73,7 @@ class ProductController extends Controller
         }
 
         return redirect()
-            ->route('products.show', $product)
+            ->route('products.portfolio')
             ->with('success', 'Product toegevoegd!');
     }
 
@@ -110,7 +114,7 @@ class ProductController extends Controller
             ->with('success', 'Product bijgewerkt!');
     }
 
-    // DELETE /products/{id} -> soft delete via deleted_at
+
     public function destroy(Request $request, Product $product)
     {
         $product->update(['deleted_at' => now()]);
@@ -123,4 +127,15 @@ class ProductController extends Controller
             ->route('products.index')
             ->with('success', 'Product verwijderd!');
     }
+    public function portfolio(Request $request)
+    {
+        $products = Product::query()
+            ->where('maker_id', $request->user()->id)
+            ->whereNull('deleted_at')
+            ->orderByDesc('created_at')
+            ->paginate(20);
+
+        return view('products.portfolio', compact('products'));
+    }
+
 }

@@ -15,23 +15,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(RolePermissionSeeder::class);
+        Role::create(['name' => 'Admin']);
+        Role::create(['name' => 'koper']);
 
-        $user = User::factory()->create([
-            'name' => 'Test User',
+        $Admin = User::create([
+            'name' => 'Admin',
             'email' => 'test@example.com',
+            'password' => bcrypt('secret'),
         ]);
 
-        // Geef een standaard rol, bv koper
-        $user->syncRoles(['koper']);
+        $koper = User::create([
+            'name' => '',
+            'email' => '',
+            'password' => bcrypt(''),
+        ]);
 
-        $koper = User::factory()->create(['name' => 'Koper', 'email' => 'koper@example.com']);
-        $koper->syncRoles(['koper']);
 
-        $maker = User::factory()->create(['name' => 'Maker', 'email' => 'maker@example.com']);
-        $maker->syncRoles(['maker']);
 
-        $mod = User::factory()->create(['name' => 'Moderator', 'email' => 'moderator@example.com']);
-        $mod->syncRoles(['moderator']);
+
+        $Admin->assignRole('Admin');
+        $koper->assignRole('Koper');
     }
 }

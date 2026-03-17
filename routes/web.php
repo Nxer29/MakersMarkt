@@ -4,8 +4,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ModerationSearchController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ModerationUserController;
+
 
 // Public page
 Route::get('/', function () {
@@ -35,6 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/maker/orders', [OrderController::class, 'makerIndex'])->name('maker.orders.index');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status.update');
 
+    // ✅ Moderation search (US-23) — alleen moderators/admin
+    Route::middleware('role:moderator|admin')->group(function () {
+        Route::get('/moderation/search', [ModerationSearchController::class, 'index'])->name('moderation.search.index');
+    });
+
     // Notifications page
     Route::get('/notifications', [NotificationController::class, 'page'])->name('notifications.page');
 
@@ -42,12 +48,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-// Moderation (US-20) - alleen moderators/admin
-Route::middleware('role:moderator|admin')->group(function () {
-    Route::get('/moderation/users', [ModerationUserController::class, 'index'])->name('moderation.users.index');
-    Route::patch('/moderation/users/{user}/verify', [ModerationUserController::class, 'updateVerified'])->name('moderation.users.verify');
 });
 
 require __DIR__.'/auth.php';

@@ -18,4 +18,29 @@ class Review extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    // ✅ context helpers voor moderatie (via order)
+    public function product()
+    {
+        return $this->hasOneThrough(
+            Product::class,
+            Order::class,
+            'id',         // Foreign key on orders...
+            'id',         // Foreign key on products...
+            'order_id',   // Local key on reviews...
+            'product_id'  // Local key on orders...
+        );
+    }
+
+    public function buyer()
+    {
+        return $this->hasOneThrough(
+            User::class,
+            Order::class,
+            'id',        // Foreign key on orders...
+            'id',        // Foreign key on users...
+            'order_id',  // Local key on reviews...
+            'buyer_id'   // Local key on orders...
+        );
+    }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ModerationUserController;
 
 // Public page
 Route::get('/', function () {
@@ -41,6 +42,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Moderation (US-20) - alleen moderators/admin
+Route::middleware('role:moderator|admin')->group(function () {
+    Route::get('/moderation/users', [ModerationUserController::class, 'index'])->name('moderation.users.index');
+    Route::patch('/moderation/users/{user}/verify', [ModerationUserController::class, 'updateVerified'])->name('moderation.users.verify');
 });
 
 require __DIR__.'/auth.php';

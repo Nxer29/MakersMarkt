@@ -44,9 +44,39 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
+        abort_unless(auth()->check() && $product->maker_id === auth()->id(), 403);
         return view('products.edit', compact('product'));
     }
 
+    public function update(Request $request, Product $product)
+    {
+        abort_unless(auth()->check() && $product->maker_id === auth()->id(), 403);
+
+        $data = $request->validate([
+            'name' => ['sometimes','string','max:255'],
+            'description' => ['sometimes','string'],
+            'type' => ['sometimes','string','max:255'],
+            'material' => ['sometimes','string'],
+            'production_time' => ['sometimes','string','max:255'],
+            'complexity' => ['sometimes','string','max:255'],
+            'durability' => ['sometimes','string'],
+            'unique_features' => ['sometimes','string'],
+        ]);
+
+        $product->update($data);
+
+        // Als dit ook via web-form gebeurt is redirect vaak fijner dan JSON:
+        // return redirect()->route('products.index')->with('success','Product bijgewerkt!');
+        return $product;
+    }
+
+    public function destroy(Product $product)
+    {
+        abort_unless(auth()->check() && $product->maker_id === auth()->id(), 403);
+
+        $product->update(['deleted_at' => now()]);
+        return response()->noContent();
+    }
     // POST /products (maker)
     public function store(Request $request)
     {
@@ -87,43 +117,7 @@ class ProductController extends Controller
     }
 
     // PATCH /products/{id}
-    public function update(Request $request, Product $product)
-    {
-        $data = $request->validate([
-            'name' => ['sometimes','string','max:255'],
-            'description' => ['sometimes','string'],
-            'type' => ['sometimes','string','max:255'],
-            'material' => ['sometimes','string'],
-            'production_time' => ['sometimes','string','max:255'],
-            'complexity' => ['sometimes','string','max:255'],
-            'durability' => ['sometimes','string'],
-            'unique_features' => ['sometimes','string'],
-        ]);
 
-        $product->update($data);
-
-        if ($request->wantsJson()) {
-            return $product->load('maker');
-        }
-
-        return redirect()
-            ->route('products.show', $product)
-            ->with('success', 'Product bijgewerkt!');
-    }
-
-
-    public function destroy(Request $request, Product $product)
-    {
-        $product->update(['deleted_at' => now()]);
-
-        if ($request->wantsJson()) {
-            return response()->noContent();
-        }
-
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Product verwijderd!');
-    }
     public function portfolio(Request $request)
     {
         $products = Product::query()

@@ -22,21 +22,24 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
+
+
     // POST /orders  (buyer koopt product)
     // body: buyer_id, product_id, amount (prijs)
     public function store(Request $request)
     {
         $isJson = $request->wantsJson();
 
+        abort_unless(auth()->check(), 401);
+
         $data = $request->validate([
+            // 'buyer_id' => ['required','integer','exists:users,id'],  // <-- weg
             'product_id' => ['required','integer','exists:products,id'],
             'amount' => ['required','numeric','min:0.01'],
         ]);
 
-        $buyer = auth()->user();
-
-        $product = Product::whereNull('deleted_at')
-            ->findOrFail($data['product_id']);
+        $buyer = auth()->user(); // <-- altijd ingelogde user
+        $product = Product::whereNull('deleted_at')->findOrFail($data['product_id']);
 
         $makerId = $product->maker_id;
 

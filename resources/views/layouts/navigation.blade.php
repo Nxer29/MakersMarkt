@@ -126,7 +126,7 @@
                 {{ __('Products') }}
             </x-responsive-nav-link>
 
-            @role('koper')
+            @role('maker')
             <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
                 {{ __('Orders') }}
             </x-responsive-nav-link>

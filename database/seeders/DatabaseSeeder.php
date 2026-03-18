@@ -18,13 +18,23 @@ class DatabaseSeeder extends Seeder
 public function run(): void
     {
         Role::create(['name' => 'Admin']);
-        Role::create(['name' => 'koper en maker']);
+        Role::create(['name' => 'koper']);
+        Role::create(['name' => 'maker']);
 
         $Admin = User::create([
             'name' => 'Admin',
             'email' => 'test@example.com',
             'password' => bcrypt('secret'),
         ]);
+
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $user->assignRole(['koper', 'maker']);
         $Admin->assignRole('Admin');
 
     }

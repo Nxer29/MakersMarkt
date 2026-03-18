@@ -14,7 +14,8 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
+
+public function run(): void
     {
         Role::create(['name' => 'Admin']);
         Role::create(['name' => 'koper en maker']);
@@ -25,5 +26,6 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('secret'),
         ]);
         $Admin->assignRole('Admin');
+
     }
 }

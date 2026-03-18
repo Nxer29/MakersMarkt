@@ -152,13 +152,74 @@ public function index(Request $request)
 
     public function portfolio(Request $request)
     {
-        $products = Product::query()
-            ->where('maker_id', $request->user()->id)
-            ->whereNull('deleted_at')
-            ->orderByDesc('created_at')
-            ->paginate(20);
+        $user = $request->user();
 
-        return view('products.portfolio', compact('products'));
+        $q = Product::query()
+            ->where('maker_id', $user->id)  // ALTijd alleen eigen producten
+            ->whereNull('deleted_at')
+            ->where('flagged', false);
+
+        // Alle filters uit index() hergebruiken:
+        if ($request->filled('type')) {
+            $q->where('type', $request->string('type'));
+        }
+
+        if ($request->filled('material')) {
+            $material = '%' . $request->string('material') . '%';
+            $q->where('material', 'like', $material);
+        }
+
+        if ($request->filled('production_time')) {
+            $q->where('production_time', $request->string('production_time'));
+        }
+
+        if ($request->filled('q')) {
+            $term = '%' . $request->string('q') . '%';
+            $q->where(function ($sub) use ($term) {
+                $sub->where('name', 'like', $term)
+                    ->orWhere('description', 'like', $term)
+                    ->orWhere('material', 'like', $term);
+            });
+        }
+
+        // ✅ NIEUW: sortering zoals US-11 vraagt
+        if ($request->filled('sort')) {
+            $direction = $request->input('direction', 'asc');
+            $sort = $request->input('sort');
+            if (in_array($sort, ['name', 'created_at']) &&
+                in_array($direction, ['asc', 'desc'])) {
+                $q->orderBy($sort, $direction);
+            }
+        } else {
+            $q->orderByDesc('created_at'); // default
+        }
+
+        $products = $q->with('maker')
+            ->paginate(20)
+            ->withQueryString(); // ✅ Paginatie behoudt ALLE filters [web:2][web:4]
+
+        if ($request->wantsJson()) {
+            return $products;
+        }
+
+        // Dropdown opties: alleen EIGEN producten (US-11 eis)
+        $types = Product::where('maker_id', $user->id)
+            ->whereNull('deleted_at')
+            ->where('flagged', false)
+            ->select('type')->distinct()->orderBy('type')->pluck('type');
+
+        $productionTimes = Product::where('maker_id', $user->id)
+            ->whereNull('deleted_at')
+            ->where('flagged', false)
+            ->select('production_time')->distinct()->orderBy('production_time')->pluck('production_time');
+
+        $materials = Product::where('maker_id', $user->id)
+            ->whereNull('deleted_at')
+            ->where('flagged', false)
+            ->select('material')->distinct()->orderBy('material')->pluck('material');
+
+        return view('products.portfolio', compact('products', 'types', 'productionTimes', 'materials'));
     }
+
 
 }

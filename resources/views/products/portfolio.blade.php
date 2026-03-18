@@ -32,6 +32,85 @@
                 </div>
             @endif
 
+            {{-- ✅ Filters (nieuw): zelfde als catalogus maar voor portfolio --}}
+            <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
+                <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Filters</h3>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                        Alleen jouw producten. Combineer filters (AND).
+                    </p>
+                </div>
+
+                <div class="p-4 sm:p-6">
+                    <form method="GET" action="{{ route('products.portfolio') }}" class="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-6 gap-4 items-end">
+                        {{-- Type --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Type</label>
+                            <select name="type" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900/30">
+                                <option value="">Alles</option>
+                                @foreach(($types ?? []) as $type)
+                                    <option value="{{ $type }}" @selected(request('type') == $type)>{{ $type }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Material (like match) --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Materiaal</label>
+                            <input
+                                type="text"
+                                name="material"
+                                value="{{ request('material') }}"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900/30"
+                                placeholder="bv. hout"
+                            >
+                        </div>
+
+                        {{-- Production time --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Productietijd</label>
+                            <select name="production_time" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900/30">
+                                <option value="">Alles</option>
+                                @foreach(($productionTimes ?? []) as $pt)
+                                    <option value="{{ $pt }}" @selected(request('production_time') == $pt)>{{ $pt }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- ✅ NIEUW: Sortering (US-11) --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Sorteren</label>
+                            <select name="sort" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900/30">
+                                <option value="">Nieuwste eerst</option>
+                                <option value="name" @selected(request('sort') == 'name')>Naam</option>
+                                <option value="created_at" @selected(request('sort') == 'created_at')>Aanmaakdatum</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Richting</label>
+                            <select name="direction" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900/30">
+                                <option value="asc" @selected(request('direction') == 'asc')>Oplopend</option>
+                                <option value="desc" @selected(request('direction', 'desc') == 'desc')>Aflopend</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-5 lg:col-span-6 flex flex-wrap gap-2 mt-2">
+                            <button
+                                class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 shadow-sm">
+                                Toepassen
+                            </button>
+
+                            <a href="{{ route('products.portfolio') }}"
+                               class="inline-flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Results (jouw originele tabel, ongewijzigd) --}}
             <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
                 <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Your products</h3>

@@ -3,31 +3,29 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run(): void
+    use WithoutModelEvents;
+
+    /**
+     * Seed the application's database.
+     */
+
+public function run(): void
     {
-        // ✅ vaste rollen (lowercase, zodat middleware role:admin werkt)
-        Role::findOrCreate('admin');
-        Role::findOrCreate('moderator');
+        Role::create(['name' => 'Admin']);
+        Role::create(['name' => 'koper en maker']);
 
-        // ✅ admin user (updateOrCreate zodat je geen duplicates krijgt)
-        $admin = User::updateOrCreate(
-            ['email' => 'hallo123@gmail.com'],
-            [
-                'name' => 'Admin',
-                'password' => Hash::make('secret123'), // kies zelf
-                'email_verified_at' => now(),          // zodat 'verified' middleware niet blokkeert
-            ]
-        );
+        $Admin = User::create([
+            'name' => 'Admin',
+            'email' => 'test@example.com',
+            'password' => bcrypt('secret'),
+        ]);
+        $Admin->assignRole('Admin');
 
-        // ✅ role toekennen (Spatie)
-        if (!$admin->hasRole('admin')) {
-            $admin->assignRole('admin');
-        }
     }
 }

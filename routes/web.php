@@ -48,8 +48,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/moderation/search', [ModerationSearchController::class, 'index'])->name('moderation.search.index');
     });
 
-    // Notifications page
+    // Notifications
     Route::get('/notifications', [NotificationController::class, 'page'])->name('notifications.page');
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead'])
+        ->name('notifications.read');
 
     // Profile (Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -5,37 +5,39 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
-
-public function run(): void
+    public function run(): void
     {
-        Role::create(['name' => 'Admin']);
-        Role::create(['name' => 'koper']);
-        Role::create(['name' => 'maker']);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $Admin = User::create([
-            'name' => 'Admin',
-            'email' => 'test@example.com',
-            'password' => bcrypt('secret'),
-        ]);
+        Role::firstOrCreate(['name' => 'Admin']);
+        Role::firstOrCreate(['name' => 'koper']);
+        Role::firstOrCreate(['name' => 'maker']);
 
+        $admin = User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('secret'),
+            ]
+        );
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'user@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => Hash::make('secret'),
+            ]
+        );
 
+        $admin->assignRole('Admin');
         $user->assignRole(['koper', 'maker']);
-        $Admin->assignRole('Admin');
-
     }
 }

@@ -152,7 +152,11 @@
                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                                         {{-- tijdelijk: prijs hardcoded of uit een veld dat jij hebt --}}
                                         <input type="hidden" name="unit_price" value="{{ $product->price }}">
-                                        <button class="text-green-600">Add to cart</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('cart.add') }}">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        <button class="text-green-600">In winkelwagen</button>
                                     </form>
                                 </td>
                             </tr>

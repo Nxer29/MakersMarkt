@@ -22,24 +22,33 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
+    // ✅ Maker overzicht: alleen orders van producten waarvan jij maker bent
+    public function makerIndex(Request $request)
+    {
+        $orders = Order::with(['product', 'buyer'])
+            ->whereHas('product', function ($q) {
+                $q->where('maker_id', auth()->id());
+            })
+            ->orderByDesc('created_at')
+            ->paginate(10);
 
+        return view('orders.maker-index', compact('orders'));
+    }
 
     // POST /orders  (buyer koopt product)
-    // body: buyer_id, product_id, amount (prijs)
     public function store(Request $request)
     {
         $isJson = $request->wantsJson();
 
-        abort_unless(auth()->check(), 401);
-
         $data = $request->validate([
-            // 'buyer_id' => ['required','integer','exists:users,id'],  // <-- weg
             'product_id' => ['required','integer','exists:products,id'],
             'amount' => ['required','numeric','min:0.01'],
         ]);
 
-        $buyer = auth()->user(); // <-- altijd ingelogde user
-        $product = Product::whereNull('deleted_at')->findOrFail($data['product_id']);
+        $buyer = auth()->user();
+
+        $product = Product::whereNull('deleted_at')
+            ->findOrFail($data['product_id']);
 
         $makerId = $product->maker_id;
 
@@ -98,15 +107,23 @@ class OrderController extends Controller
             'status_note' => ['nullable','string','max:255'],
         ]);
 
-
+        // ✅ Alleen maker van dit product mag status wijzigen
         $order->loadMissing('product');
         if (($order->product?->maker_id ?? null) !== auth()->id()) {
             abort(403);
         }
 
-        $allowed = ['nieuw','in_productie','verzonden','geweigerd_terugbetaald'];
+        // ✅ Alleen statuses uit US-16 (nieuw is alleen startstatus, niet via update)
+        $allowed = ['in_productie','verzonden','geweigerd_terugbetaald'];
         if (!in_array($data['status'], $allowed, true)) {
-            return response()->json(['message' => 'Ongeldige status.'], 422);
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Ongeldige status.'], 422);
+            }
+
+            return redirect()
+                ->back()
+                ->withErrors(['status' => 'Ongeldige status.'])
+                ->withInput();
         }
 
         // Als geweigerd_terugbetaald => refund transactie uitvoeren
@@ -127,7 +144,13 @@ class OrderController extends Controller
             'created_at' => now(),
         ]);
 
-        return $order;
+        if ($request->wantsJson()) {
+            return $order;
+        }
+
+        return redirect()
+            ->route('maker.orders.index')
+            ->with('success', 'Order status bijgewerkt.');
     }
 
     private function refund(Request $request, Order $order, ?string $note)
@@ -138,10 +161,17 @@ class OrderController extends Controller
             ->first();
 
         if (!$purchase) {
-            return response()->json(['message' => 'Geen purchase transactie gevonden voor refund.'], 422);
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Geen purchase transactie gevonden voor refund.'], 422);
+            }
+
+            return redirect()
+                ->back()
+                ->withErrors(['status' => 'Geen purchase transactie gevonden voor refund.'])
+                ->withInput();
         }
 
-        return DB::transaction(function () use ($order, $purchase, $note) {
+        $updated = DB::transaction(function () use ($order, $purchase, $note) {
             $maker = User::lockForUpdate()->findOrFail($purchase->to_user_id);
             $buyer = User::lockForUpdate()->findOrFail($purchase->from_user_id);
 
@@ -173,5 +203,13 @@ class OrderController extends Controller
 
             return $order;
         });
+
+        if ($request->wantsJson()) {
+            return $updated;
+        }
+
+        return redirect()
+            ->route('maker.orders.index')
+            ->with('success', 'Order geweigerd en terugbetaling verwerkt.');
     }
 }

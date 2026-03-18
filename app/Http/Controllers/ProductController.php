@@ -8,34 +8,64 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     // GET /products?type=...&q=...
-    public function index(Request $request)
-    {
-        $q = Product::query()
-            ->whereNull('deleted_at')
-            ->where('flagged', false);
+    // GET /products?type=...&material=...&production_time=...&q=...
+public function index(Request $request)
+{
+    $q = Product::query()
+        ->whereNull('deleted_at')
+        ->where('flagged', false);
 
-        if ($request->filled('type')) {
-            $q->where('type', $request->string('type'));
-        }
-
-        if ($request->filled('q')) {
-            $term = '%' . $request->string('q') . '%';
-            $q->where(function ($sub) use ($term) {
-                $sub->where('name', 'like', $term)
-                    ->orWhere('description', 'like', $term)
-                    ->orWhere('material', 'like', $term);
-            });
-        }
-
-        // ✅ CHANGE: maker eager-load
-        $products = $q->with('maker')->orderByDesc('created_at')->paginate(20);
-
-        if ($request->wantsJson()) {
-            return $products;
-        }
-
-        return view('products.index', compact('products'));
+    // Filter: type (bestond al)
+    if ($request->filled('type')) {
+        $q->where('type', $request->string('type'));
     }
+
+    // Filter: material (nieuw)
+    // "contains" match zodat "hout" ook matcht op "eikenhout"
+    if ($request->filled('material')) {
+        $material = '%' . $request->string('material') . '%';
+        $q->where('material', 'like', $material);
+    }
+
+    // Filter: production_time (nieuw)
+    // Omdat production_time een string is, doen we exact match op stored value
+    if ($request->filled('production_time')) {
+        $q->where('production_time', $request->string('production_time'));
+    }
+
+    // Search (bestond al)
+    if ($request->filled('q')) {
+        $term = '%' . $request->string('q') . '%';
+        $q->where(function ($sub) use ($term) {
+            $sub->where('name', 'like', $term)
+                ->orWhere('description', 'like', $term)
+                ->orWhere('material', 'like', $term);
+        });
+    }
+
+    // maker eager-load (had je al)
+    $products = $q->with('maker')
+        ->orderByDesc('created_at')
+        ->paginate(20)
+        ->withQueryString(); // belangrijk: paginatie behoudt filters
+
+    if ($request->wantsJson()) {
+        return $products;
+    }
+
+    // Dropdown opties (distinct) voor UI filters
+    $types = Product::query()
+        ->whereNull('deleted_at')
+        ->where('flagged', false)
+        ->select('type')->distinct()->orderBy('type')->pluck('type');
+
+    $productionTimes = Product::query()
+        ->whereNull('deleted_at')
+        ->where('flagged', false)
+        ->select('production_time')->distinct()->orderBy('production_time')->pluck('production_time');
+
+    return view('products.index', compact('products', 'types', 'productionTimes'));
+}
 
     public function create()
     {

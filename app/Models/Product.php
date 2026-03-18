@@ -9,6 +9,7 @@ class Product extends Model
     protected $fillable = [
         'maker_id','name','description','type','material',
         'production_time','complexity','durability','unique_features',
+        'price',   // ✅ toevoegen
         'verified','flagged','deleted_at',
     ];
 
@@ -16,6 +17,7 @@ class Product extends Model
         'verified' => 'boolean',
         'flagged' => 'boolean',
         'deleted_at' => 'datetime',
+        'price' => 'decimal:2', // ✅ toevoegen
     ];
 
     public function maker()

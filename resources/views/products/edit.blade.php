@@ -62,6 +62,13 @@
                             <textarea name="description" rows="5"
                                       class="mt-1 w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $product->description) }}</textarea>
                         </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Prijs</label>
+                            <input name="price" value="{{ old('price', $product->price) }}"
+                                   class="mt-1 w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500" />
+                        </div>
+
                     </div>
                 </div>
 

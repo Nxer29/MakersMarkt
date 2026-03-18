@@ -5,6 +5,9 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Models\Product;
+
 
 // Public page
 Route::get('/', function () {
@@ -41,6 +44,75 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+
+        Route::get('/cart', function (Request $request) {
+        $cart = $request->session()->get('cart', []);
+        // ...
+        })->name('cart.index');
+        Route::get('/cart', function (Request $request) {
+            $cart = $request->session()->get('cart', []); // [productId => ['qty'=>1, 'unit_price'=>..]]
+            $productIds = array_keys($cart);
+
+            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+            $items = [];
+            $total = 0;
+
+            foreach ($cart as $productId => $row) {
+                $product = $products->get((int)$productId);
+                if (!$product) continue;
+
+                $qty = (int)($row['qty'] ?? 1);
+                $unit = (float)($row['unit_price'] ?? 0);
+                $line = $qty * $unit;
+
+                $items[] = [
+                    'product' => $product,
+                    'qty' => $qty,
+                    'unit_price' => $unit,
+                    'line_total' => $line,
+                ];
+
+                $total += $line;
+            }
+
+            return view('cart.index', compact('items', 'total'));
+        })->name('cart.index');
+
+        // Add to cart
+        Route::post('/cart/add', function (Request $request) {
+            $data = $request->validate([
+                'product_id' => ['required','integer','exists:products,id'],
+                'unit_price' => ['required','numeric','min:0.01'],
+            ]);
+
+            $cart = $request->session()->get('cart', []);
+
+            $pid = (string)$data['product_id'];
+            $cart[$pid] = [
+                'qty' => (($cart[$pid]['qty'] ?? 0) + 1),
+                'unit_price' => (float)$data['unit_price'],
+            ];
+
+            $request->session()->put('cart', $cart);
+
+            return back()->with('success', 'Toegevoegd aan winkelwagen.');
+        })->name('cart.add');
+
+        // Remove one product entirely
+        Route::post('/cart/remove', function (Request $request) {
+            $data = $request->validate([
+                'product_id' => ['required','integer'],
+            ]);
+
+            $cart = $request->session()->get('cart', []);
+            unset($cart[(string)$data['product_id']]);
+            $request->session()->put('cart', $cart);
+
+            return back()->with('success', 'Verwijderd uit winkelwagen.');
+        })->name('cart.remove');
 });
 
 require __DIR__.'/auth.php';

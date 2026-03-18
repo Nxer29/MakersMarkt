@@ -56,8 +56,12 @@
                         <p class="mt-2 text-gray-700 dark:text-gray-200">
                             {{ $product->description }}
                         </p>
-                    </div>
 
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Prijs</h3>
+                        <p class="mt-2 text-gray-700 dark:text-gray-200">
+                            € {{ number_format($product->price, 2) }}
+                        </p>
+                    </div>
                     <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Specificaties</h3>
 

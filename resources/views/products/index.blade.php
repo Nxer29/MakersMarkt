@@ -70,6 +70,13 @@
                                         <a class="text-indigo-600 dark:text-indigo-400 hover:underline" href="{{ route('products.show', $product) }}">View</a>
                                         <a class="text-indigo-600 dark:text-indigo-400 hover:underline" href="{{ route('products.edit', $product) }}">Edit</a>
                                     </div>
+                                    <form method="POST" action="{{ route('cart.add') }}">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        {{-- tijdelijk: prijs hardcoded of uit een veld dat jij hebt --}}
+                                        <input type="hidden" name="unit_price" value="{{ $product->price }}">
+                                        <button class="text-green-600">Add to cart</button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach

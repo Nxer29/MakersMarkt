@@ -66,6 +66,15 @@
                             <textarea name="description" rows="5" placeholder="Vertel kort wat het is en voor wie..."
                                       class="mt-1 w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">{{ old('description') }}</textarea>
                         </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Prijs <span class="text-red-500">*</span></label>
+                            <input name="price" value="{{ old('price') }}" placeholder="Bijv. 49.99"
+                                   class="mt-1 w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500" />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Vul een geldig bedrag in, bijv. 49.99</p>
+                        </div>
+
+
                     </div>
                 </div>
 

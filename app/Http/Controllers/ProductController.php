@@ -77,18 +77,15 @@ public function index(Request $request)
         abort_unless(auth()->check() && $product->maker_id === auth()->id(), 403);
         return view('products.edit', compact('product'));
     }
-
     public function update(Request $request, Product $product)
     {
-        abort_unless(auth()->check() && $product->maker_id === auth()->id(), 403);
-
         $data = $request->validate([
             'name' => ['sometimes','string','max:255'],
             'description' => ['sometimes','string'],
             'type' => ['sometimes','string','max:255'],
             'material' => ['sometimes','string'],
             'production_time' => ['sometimes','string','max:255'],
-            'price' => ['sometimes','numeric','min:0.01'],
+            'price' => ['sometimes','numeric','min:0'],
             'complexity' => ['sometimes','string','max:255'],
             'durability' => ['sometimes','string'],
             'unique_features' => ['sometimes','string'],
@@ -96,9 +93,15 @@ public function index(Request $request)
 
         $product->update($data);
 
-        // Als dit ook via web-form gebeurt is redirect vaak fijner dan JSON:
-        // return redirect()->route('products.index')->with('success','Product bijgewerkt!');
-        return $product;
+        // Als API/JSON request
+        if ($request->wantsJson()) {
+            return $product;
+        }
+
+        // Normale web flow
+        return redirect()
+            ->route('products.show', $product)
+            ->with('success', 'Product opgeslagen!');
     }
 
     public function destroy(Product $product)
@@ -117,7 +120,7 @@ public function index(Request $request)
             'type' => ['required','string','max:255'],
             'material' => ['required','string'],
             'production_time' => ['required','string','max:255'],
-            'price' => ['required','numeric','min:0.01'],
+            'price' => ['required','numeric','min:0'],
             'complexity' => ['required','string','max:255'],
             'durability' => ['required','string'],
             'unique_features' => ['required','string'],

@@ -15,29 +15,19 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        Role::create(['name' => 'admin']);
+        Role::create(['name' => 'koper']);
+        Role::create(['name' => 'maker']);
 
-        Role::firstOrCreate(['name' => 'Admin']);
-        Role::firstOrCreate(['name' => 'koper']);
-        Role::firstOrCreate(['name' => 'maker']);
+        $Admin = User::create([
+            'name' => 'admin',
+            'email' => 'test@example.com',
+            'password' => bcrypt('secret'),
+        ]);
 
-        $admin = User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Admin',
-                'password' => Hash::make('secret'),
-            ]
-        );
 
-        $user = User::firstOrCreate(
-            ['email' => 'user@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => Hash::make('secret'),
-            ]
-        );
 
-        $admin->assignRole('Admin');
-        $user->assignRole(['koper', 'maker']);
+        $Admin->assignRole('admin');
+
     }
 }

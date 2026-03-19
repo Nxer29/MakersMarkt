@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\Order;
 use App\Models\Notification;
+use App\Http\Controllers\Admin\AdminDashboardController;
 
 
 // Public page
@@ -24,6 +25,13 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', 'verified', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', AdminDashboardController::class)->name('dashboard');
+    });
 
 Route::middleware(['auth', 'verified'])->group(function () {
 

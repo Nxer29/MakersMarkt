@@ -34,6 +34,13 @@
                     <x-nav-link :href="route('notifications.page')" :active="request()->routeIs('notifications.*')">
                         {{ __('Notifications') }}
                     </x-nav-link>
+
+                    @role('admin')
+                    <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                        {{ __('Admin') }}
+                    </x-nav-link>
+                    @endrole
+
                 </div>
             </div>
 
@@ -127,6 +134,8 @@
                     </script>
                 </span>
                         </button>
+
+
 
                         <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
 

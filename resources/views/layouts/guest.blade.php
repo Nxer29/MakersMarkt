@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'MakersMarkt') }}</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
-    <!-- ✅ Theme loader (no flash) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <script>
         (function () {
-            const stored = localStorage.getItem('theme');
+            const stored = localStorage.getItem('theme'); // 'light' | 'dark' | null
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             const theme = stored ?? (prefersDark ? 'dark' : 'light');
 
@@ -26,19 +26,36 @@
         })();
     </script>
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 </head>
-<body class="font-sans text-gray-900 antialiased">
-<div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-    <div>
-        <a href="/">
-            <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-        </a>
+
+<body class="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+<div class="min-h-screen flex items-center justify-center px-4 py-10">
+    {{-- Background glow --}}
+    <div class="pointer-events-none fixed inset-0 overflow-hidden">
+        <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl"></div>
+        <div class="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-purple-500/20 blur-3xl"></div>
     </div>
 
-    <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-        {{ $slot }}
+    <div class="w-full max-w-md relative">
+        {{-- Logo / title --}}
+        <div class="flex items-center justify-center gap-3 mb-6">
+            <div class="h-11 w-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow">
+                MM
+            </div>
+            <div class="text-xl font-semibold tracking-tight">
+                MakersMarkt
+            </div>
+        </div>
+
+        {{-- Auth card --}}
+        <div class="bg-white/90 dark:bg-gray-900/80 backdrop-blur border border-gray-200 dark:border-gray-800 shadow-sm rounded-2xl p-6 sm:p-8">
+            {{ $slot }}
+        </div>
+
+        <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+            © {{ date('Y') }} MakersMarkt
+        </p>
     </div>
 </div>
 </body>

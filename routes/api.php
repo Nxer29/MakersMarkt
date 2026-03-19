@@ -22,6 +22,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+
     });
 
     // Koper-only: orders plaatsen + review

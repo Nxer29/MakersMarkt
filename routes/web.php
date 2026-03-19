@@ -48,6 +48,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Orders page (for buyer)
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
+    // Maker: incoming orders
+    Route::middleware(['role:maker'])->group(function () {
+        Route::get('/maker/orders', [OrderController::class, 'makerIndex'])->name('maker.orders.index');
+        Route::patch('/maker/orders/{order}/status', [OrderController::class, 'updateStatusAsMaker'])->name('maker.orders.status');
+    });
+
     Route::get('/maker/orders', [OrderController::class, 'makerIndex'])->name('maker.orders.index');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status.update');
 

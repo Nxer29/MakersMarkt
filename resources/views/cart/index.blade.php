@@ -18,21 +18,21 @@
                     <table class="min-w-full text-sm">
                         <thead>
                         <tr class="border-b text-left">
-                            <th class="py-2">Product</th>
-                            <th class="py-2">Aantal</th>
-                            <th class="py-2">Prijs</th>
-                            <th class="py-2">Subtotaal</th>
-                            <th class="py-2">Actie</th>
+                            <th class="py-2 text-gray-700 dark:text-gray-300">Product</th>
+                            <th class="py-2 text-gray-700 dark:text-gray-300">Aantal</th>
+                            <th class="py-2 text-gray-700 dark:text-gray-300">Prijs</th>
+                            <th class="py-2 text-gray-700 dark:text-gray-300">Subtotaal</th>
+                            <th class="py-2 text-gray-700 dark:text-gray-300">Actie</th>
                         </tr>
                         </thead>
                         <tbody>
                         @foreach($items as $row)
                             <tr class="border-b">
-                                <td class="py-2">{{ $row['product']->name }}</td>
-                                <td class="py-2">{{ $row['qty'] }}</td>
-                                <td class="py-2">€ {{ number_format($row['unit'], 2, ',', '.') }}</td>
-                                <td class="py-2">€ {{ number_format($row['line'], 2, ',', '.') }}</td>
-                                <td class="py-2">
+                                <td class="py-2 text-gray-700 dark:text-gray-300">{{ $row['product']->name }}</td>
+                                <td class="py-2 text-gray-700 dark:text-gray-300">{{ $row['qty'] }}</td>
+                                <td class="py-2 text-gray-700 dark:text-gray-300">€ {{ number_format($row['unit'], 2, ',', '.') }}</td>
+                                <td class="py-2 text-gray-700 dark:text-gray-300">€ {{ number_format($row['line'], 2, ',', '.') }}</td>
+                                <td class="py-2 text-gray-700 dark:text-gray-300">
                                     <form method="POST" action="{{ route('cart.remove') }}">
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $row['product']->id }}">

@@ -36,20 +36,6 @@
                                 {{ ($user->verified ?? false) ? 'Verified' : 'Not verified' }}
                             </dd>
                         </div>
-
-                        <div class="flex items-center justify-between gap-4">
-                            <dt class="text-gray-500 dark:text-gray-400">Winkelkrediet</dt>
-                            <dd class="font-medium text-gray-900 dark:text-gray-100">
-                                {{ $user->store_credit ?? 0 }}
-                            </dd>
-                        </div>
-
-                        <div class="flex items-center justify-between gap-4">
-                            <dt class="text-gray-500 dark:text-gray-400">E-mail geverifieerd</dt>
-                            <dd class="font-medium text-gray-900 dark:text-gray-100">
-                                {{ $user->email_verified_at ? 'Ja' : 'Nee' }}
-                            </dd>
-                        </div>
                     </dl>
                 </div>
             </div>

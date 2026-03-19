@@ -70,8 +70,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
             'verified' => 'boolean',
+            'password' => 'hashed',
             'wallet_credit' => 'decimal:2',
         ];
     }

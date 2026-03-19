@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Order;
 use App\Models\Notification;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\UserVerificationController;
 
 
 // Public page
@@ -31,6 +32,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])
     ->name('admin.')
     ->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
+        Route::get('/users', [UserVerificationController::class, 'index'])->name('users.index');
+        Route::patch('/users/{user}/verified', [UserVerificationController::class, 'update'])->name('users.verified');
     });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -49,7 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
     // Maker: incoming orders
-    Route::middleware(['role:maker'])->group(function () {
+    Route::middleware(['role:maker|admin'])->group(function () {
         Route::get('/maker/orders', [OrderController::class, 'makerIndex'])->name('maker.orders.index');
         Route::patch('/maker/orders/{order}/status', [OrderController::class, 'updateStatusAsMaker'])->name('maker.orders.status');
     });

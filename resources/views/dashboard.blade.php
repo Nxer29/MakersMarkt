@@ -37,28 +37,28 @@
                             </a>
 
                             <a href="{{ route('orders.index') }}"
-                               class="px-5 py-3 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900">
+                               class="px-5 py-3 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-300">
                                 Mijn bestellingen
                             </a>
                         </div>
 
                         <div class="mt-8 grid sm:grid-cols-3 gap-4">
                             <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-                                <div class="font-semibold">Veilig betalen</div>
+                                <div class="font-semibold text-gray-700 dark:text-gray-300">Veilig betalen</div>
                                 <div class="text-sm text-gray-600 dark:text-gray-300">
                                     Met winkelkrediet & automatische transfer.
                                 </div>
                             </div>
 
                             <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-                                <div class="font-semibold">Unieke items</div>
+                                <div class="font-semibold text-gray-700 dark:text-gray-300">Unieke items</div>
                                 <div class="text-sm text-gray-600 dark:text-gray-300">
                                     Handgemaakt door echte makers.
                                 </div>
                             </div>
 
                             <div class="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-                                <div class="font-semibold">Transparant</div>
+                                <div class="font-semibold text-gray-700 dark:text-gray-300 ">Transparant</div>
                                 <div class="text-sm text-gray-600 dark:text-gray-300">
                                     Bestellingen en logs altijd terug te vinden.
                                 </div>
@@ -71,7 +71,7 @@
                         <div class="absolute -inset-4 bg-gradient-to-tr from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-2xl"></div>
 
                         <div class="relative p-6 sm:p-8 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow">
-                            <h2 class="text-xl font-semibold">Waarom MakersMarkt?</h2>
+                            <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 ">Waarom MakersMarkt?</h2>
 
                             <ul class="mt-4 space-y-3 text-gray-700 dark:text-gray-300">
                                 <li>• Voeg producten toe aan je winkelwagen</li>
@@ -82,7 +82,7 @@
 
                             <div class="mt-6 p-4 rounded-xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800">
                                 <div class="text-sm text-gray-600 dark:text-gray-300">Tip</div>
-                                <div class="font-semibold">
+                                <div class="font-semibold text-gray-900 dark:text-gray-100">
                                     Check je winkelwagen en je krediet in de navigatiebalk bovenaan.
                                 </div>
                             </div>
@@ -95,7 +95,7 @@
             <section class="mt-10 border-t border-gray-200 dark:border-gray-800 pt-8 px-4 sm:px-0">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
-                        <h3 class="text-xl font-semibold">Snel starten</h3>
+                        <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300">Snel starten</h3>
                         <p class="text-gray-600 dark:text-gray-300">
                             Ga direct naar je catalogus, bestellingen of meldingen.
                         </p>
@@ -108,7 +108,7 @@
                         </a>
 
                         <a href="{{ route('notifications.page') }}"
-                           class="px-5 py-3 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900">
+                           class="px-5 py-3 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100">
                             Meldingen
                         </a>
                     </div>

@@ -46,7 +46,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Type</label>
                             <select name="type" class="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900/30">
-                                <option value="">Alles</option>
+                                <option class="text-gray-700 dark:text-gray-300" value="">Alles</option>
                                 @foreach(($types ?? []) as $type)
                                     <option value="{{ $type }}" @selected(request('type') == $type)>{{ $type }}</option>
                                 @endforeach
@@ -129,7 +129,7 @@
                                     </a>
                                 </td>
                                 <td class="py-3 px-6">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-1 text-xs font-medium text-gray-800 dark:text-gray-100">
+                                    <span class="  inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-1 text-xs font-medium text-gray-800 dark:text-gray-100">
                                         {{ $product->type }}
                                     </span>
                                 </td>
@@ -152,7 +152,11 @@
                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                                         {{-- tijdelijk: prijs hardcoded of uit een veld dat jij hebt --}}
                                         <input type="hidden" name="unit_price" value="{{ $product->price }}">
-                                        <button class="text-green-600">Add to cart</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('cart.add') }}">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        <button class="text-green-600">In winkelwagen</button>
                                     </form>
                                 </td>
                             </tr>

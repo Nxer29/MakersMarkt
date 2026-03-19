@@ -22,7 +22,6 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
-    // ✅ Maker overzicht: alleen orders van producten waarvan jij maker bent
     public function makerIndex(Request $request)
     {
         $orders = Order::with(['product', 'buyer'])
@@ -32,7 +31,58 @@ class OrderController extends Controller
             ->orderByDesc('created_at')
             ->paginate(10);
 
-        return view('orders.maker-index', compact('orders'));
+        return view('maker.orders.index', compact('orders'));
+    }
+
+    public function updateStatusAsMaker(Request $request, Order $order)
+    {
+        $order->load('product');
+
+        // Alleen maker van het product mag dit aanpassen
+        if (!$order->product || $order->product->maker_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'status' => ['required','string'],
+            'status_note' => ['nullable','string','max:255'],
+        ]);
+
+        $allowed = ['nieuw','in_productie','verzonden','geweigerd_terugbetaald'];
+        if (!in_array($data['status'], $allowed, true)) {
+            return back()->withErrors(['status' => 'Ongeldige status.']);
+        }
+
+        if ($data['status'] === 'geweigerd_terugbetaald') {
+            // Als al refunded: geen 2e keer
+            if ($order->status === 'geweigerd_terugbetaald') {
+                return back()->with('success', 'Deze bestelling is al geweigerd en terugbetaald.');
+            }
+
+            $refundResult = $this->refund($request, $order, $data['status_note'] ?? null);
+
+            // refund() retourneert een Order (of JSON response bij error). Voor web: success flash.
+            if ($refundResult instanceof \Illuminate\Http\JsonResponse) {
+                $payload = $refundResult->getData(true);
+                return back()->withErrors(['refund' => $payload['message'] ?? 'Refund mislukt.']);
+            }
+
+            return back()->with('success', 'Bestelling geweigerd. Terugbetaling verzonden.');
+        }
+
+        $order->update([
+            'status' => $data['status'],
+            'status_note' => $data['status_note'] ?? null,
+        ]);
+
+        Notification::create([
+            'user_id' => $order->buyer_id,
+            'message' => "Bestelling (#{$order->id}) status: {$order->status}.",
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+
+        return back()->with('success', 'Status bijgewerkt.');
     }
 
     // POST /orders  (buyer koopt product)
@@ -155,28 +205,41 @@ class OrderController extends Controller
 
     private function refund(Request $request, Order $order, ?string $note)
     {
+        // Idempotency: als refund al bestaat, niet opnieuw boeken
+        $alreadyRefunded = CreditTransaction::where('order_id', $order->id)
+            ->where('reason', 'refund')
+            ->exists();
+
+        if ($alreadyRefunded) {
+            $order->update([
+                'status' => 'geweigerd_terugbetaald',
+                'status_note' => $note,
+            ]);
+
+            return $order->fresh();
+        }
+
         $purchase = CreditTransaction::where('order_id', $order->id)
             ->where('reason', 'purchase')
             ->orderByDesc('id')
             ->first();
 
         if (!$purchase) {
-            if ($request->wantsJson()) {
-                return response()->json(['message' => 'Geen purchase transactie gevonden voor refund.'], 422);
-            }
-
-            return redirect()
-                ->back()
-                ->withErrors(['status' => 'Geen purchase transactie gevonden voor refund.'])
-                ->withInput();
+            return response()->json(['message' => 'Geen purchase transactie gevonden voor refund.'], 422);
         }
 
-        $updated = DB::transaction(function () use ($order, $purchase, $note) {
+        return DB::transaction(function () use ($order, $purchase, $note) {
             $maker = User::lockForUpdate()->findOrFail($purchase->to_user_id);
             $buyer = User::lockForUpdate()->findOrFail($purchase->from_user_id);
 
+            // Voorkom negatieve maker wallet (als dit niet mag in jouw app)
+            if ((float)$maker->wallet_credit < (float)$purchase->amount) {
+                return response()->json(['message' => 'Maker heeft onvoldoende krediet om te refunden.'], 422);
+            }
+
             $maker->wallet_credit = (float)$maker->wallet_credit - (float)$purchase->amount;
             $buyer->wallet_credit = (float)$buyer->wallet_credit + (float)$purchase->amount;
+
             $maker->save();
             $buyer->save();
 
@@ -201,15 +264,7 @@ class OrderController extends Controller
                 'created_at' => now(),
             ]);
 
-            return $order;
+            return $order->fresh();
         });
-
-        if ($request->wantsJson()) {
-            return $updated;
-        }
-
-        return redirect()
-            ->route('maker.orders.index')
-            ->with('success', 'Order geweigerd en terugbetaling verwerkt.');
     }
 }

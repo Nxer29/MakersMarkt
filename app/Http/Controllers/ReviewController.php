@@ -31,13 +31,16 @@ class ReviewController extends Controller
         ]);
 
         // notificatie maker
-        $makerId = $order->product->maker_id;
+        $product = $order->product;
+        $makerId = $product->maker_id;
+
         Notification::create([
             'user_id' => $makerId,
-            'message' => "Nieuwe review voor bestelling (#{$order->id}).",
+            'message' => "Nieuwe review voor product '{$product->name}' met rating {$review->rating}/5 bij bestelling (#{$order->id}).",
             'is_read' => false,
             'created_at' => now(),
         ]);
+
 
         return response()->json($review, 201);
     }

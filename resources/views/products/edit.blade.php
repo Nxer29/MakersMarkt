@@ -1,5 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
+
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Products</p>
@@ -36,6 +37,12 @@
                         <ul class="list-disc ml-5 mt-2 text-sm">
                             @foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach
                         </ul>
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div class="mt-4 p-3 bg-green-100 text-green-800 rounded">
+                        {{ session('success') }}
                     </div>
                 @endif
 
@@ -122,4 +129,5 @@
             </form>
         </div>
     </div>
+
 </x-app-layout>

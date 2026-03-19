@@ -24,8 +24,8 @@ class User extends Authenticatable
         'password',
         'role',
         'verified',
-        'store_credit',
-    ];
+        'wallet_credit' => 'decimal:2',
+        ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -70,9 +70,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
             'verified' => 'boolean',
-            'store_credit' => 'integer',
+            'password' => 'hashed',
+            'wallet_credit' => 'decimal:2',
         ];
     }
 }

@@ -1,113 +1,88 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Buyer</p>
-                <h2 class="mt-1 font-semibold text-xl text-gray-900 dark:text-gray-100 leading-tight">
-                    My Orders
-                </h2>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                    Bekijk de laatste status van je bestellingen.
-                </p>
+    <div class="py-8 max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    Inkomende bestellingen
+                </h1>
+                <div class="text-sm text-gray-600 dark:text-gray-300">
+                    Alleen jouw producten
+                </div>
             </div>
-
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('products.index') }}"
-                   class="inline-flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    Browse products
-                </a>
-            </div>
-        </div>
-    </x-slot>
-
-    @php
-        $statusLabels = [
-            'nieuw' => 'Nieuw',
-            'in_productie' => 'In productie',
-            'verzonden' => 'Verzonden',
-            'geweigerd_terugbetaald' => 'Geweigerd, terugbetaling verzonden',
-        ];
-
-        $statusBadge = function (?string $status) {
-            return match ($status) {
-                'verzonden' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
-                'in_productie' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200',
-                'geweigerd_terugbetaald' => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
-                default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100',
-            };
-        };
-    @endphp
-
-    <div class="py-10">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @if(session('success'))
-                <div class="rounded-xl border border-green-200 dark:border-green-900/40 bg-green-50 dark:bg-green-900/20 p-4 text-green-800 dark:text-green-200">
+                <div class="mt-4 p-3 bg-green-100 text-green-800 rounded">
                     {{ session('success') }}
                 </div>
             @endif
 
-            <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
-                <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Orders</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-300">{{ $orders->total() }} items</p>
+            @if($errors->any())
+                <div class="mt-4 p-3 bg-red-100 text-red-800 rounded">
+                    {{ $errors->first() }}
                 </div>
+            @endif
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-900/40">
-                        <tr class="text-left">
-                            <th class="py-3 px-6 font-medium text-gray-600 dark:text-gray-300">Order</th>
-                            <th class="py-3 px-6 font-medium text-gray-600 dark:text-gray-300">Product</th>
-                            <th class="py-3 px-6 font-medium text-gray-600 dark:text-gray-300">Status</th>
-                            <th class="py-3 px-6 font-medium text-gray-600 dark:text-gray-300">Note</th>
-                            <th class="py-3 px-6 font-medium text-gray-600 dark:text-gray-300">Created</th>
+            <div class="mt-6 overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                    <tr class="border-b text-left">
+                        <th class="py-2 text-gray-700 dark:text-gray-300">Order</th>
+                        <th class="py-2 text-gray-700 dark:text-gray-300">Product</th>
+                        <th class="py-2 text-gray-700 dark:text-gray-300">Buyer</th>
+                        <th class="py-2 text-gray-700 dark:text-gray-300">Status</th>
+                        <th class="py-2 text-gray-700 dark:text-gray-300">Notitie</th>
+                        <th class="py-2 text-gray-700 dark:text-gray-300">Actie</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    @foreach($orders as $order)
+                        <tr class="border-b align-top">
+                            <td class="py-2 text-gray-700 dark:text-gray-300">#{{ $order->id }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300">{{ $order->product?->name }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300">{{ $order->buyer?->name }}</td>
+                            <td class="py-2 text-gray-700 dark:text-gray-300">
+                                <span class="px-2 py-1 rounded bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+                                    {{ $order->status }}
+                                </span>
+                            </td>
+                            <td class="py-2">{{ $order->status_note }}</td>
+
+                            <td class="py-2">
+                                <form method="POST"
+                                      action="{{ route('maker.orders.status', $order) }}"
+                                      class="flex flex-col gap-2 w-72"
+                                      onsubmit="return confirm('Weet je zeker dat je deze wijziging wilt uitvoeren?');">
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <select name="status"
+                                            class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                                        <option value="nieuw" @selected($order->status === 'nieuw')>nieuw</option>
+                                        <option value="in_productie" @selected($order->status === 'in_productie')>in productie</option>
+                                        <option value="verzonden" @selected($order->status === 'verzonden')>verzonden</option>
+                                        <option value="geweigerd_terugbetaald" @selected($order->status === 'geweigerd_terugbetaald')>
+                                            geweigerd, terugbetaling verzonden
+                                        </option>
+                                    </select>
+
+                                    <input name="status_note"
+                                           value="{{ old('status_note') }}"
+                                           placeholder="Optionele reden (max 255)"
+                                           class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" />
+
+                                    <button class="px-3 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">
+                                        Update status
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
-                        </thead>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse($orders as $order)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/30">
-                                <td class="py-3 px-6 text-gray-900 dark:text-gray-100 font-medium">
-                                    #{{ $order->id }}
-                                </td>
-
-                                <td class="py-3 px-6">
-                                    <div class="text-gray-900 dark:text-gray-100 font-medium">
-                                        {{ $order->product?->name ?? 'Unknown product' }}
-                                    </div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                                        Product ID: {{ $order->product_id }}
-                                    </div>
-                                </td>
-
-                                <td class="py-3 px-6">
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium {{ $statusBadge($order->status) }}">
-                                        {{ $statusLabels[$order->status] ?? $order->status }}
-                                    </span>
-                                </td>
-
-                                <td class="py-3 px-6 text-gray-700 dark:text-gray-200">
-                                    {{ $order->status_note ?? '—' }}
-                                </td>
-
-                                <td class="py-3 px-6 text-gray-700 dark:text-gray-200">
-                                    {{ $order->created_at->format('Y-m-d H:i') }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="py-12 px-6 text-gray-600 dark:text-gray-300">
-                                    Je hebt nog geen orders.
-                                </td>
-                            </tr>
-                        @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="p-4 sm:p-6">
-                    {{ $orders->links() }}
-                </div>
+            <div class="mt-6">
+                {{ $orders->links() }}
             </div>
         </div>
     </div>

@@ -17,7 +17,7 @@ use App\Models\Notification;
 
 // Public page
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 })->name('home');
 
 // Dashboard (Breeze)

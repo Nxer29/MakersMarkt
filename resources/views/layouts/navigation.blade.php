@@ -130,25 +130,6 @@
                         </x-dropdown-link>
 
                         {{-- ✅ Admin-only tools in dropdown --}}
-                        @role('admin')
-                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
-
-                        <div class="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Admin tools
-                        </div>
-
-                        <x-dropdown-link :href="route('moderation.users.index')">
-                            Users (verify)
-                        </x-dropdown-link>
-
-                        <x-dropdown-link :href="route('moderation.search.index')">
-                            Moderation search
-                        </x-dropdown-link>
-
-                        <x-dropdown-link :href="route('admin.dashboard')">
-                            Admin dashboard
-                        </x-dropdown-link>
-                        @endrole
 
                         <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
 
